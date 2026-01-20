@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css'
 import { useAuth } from './providers/AuthProvider';
+// import { useNavigate } from 'react-router-dom';
 
 
 const apiUrl = import.meta.env.VITE_BASE_API;
@@ -8,6 +9,7 @@ const apiUrl = import.meta.env.VITE_BASE_API;
 function App() {
   const [data, setData] = useState({ "Message": "No Data"});
   const { user } = useAuth();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     console.log('inUseEffect',user);

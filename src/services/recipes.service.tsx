@@ -1,17 +1,17 @@
 const apiUrl = import.meta.env.VITE_BASE_API;
 
-export const readUserByUsername = async (username: string) => {
+export const readRecipesByUser = async (userId: number | undefined) => {
   try {
     const data = await fetch(
-      `${apiUrl}/api/user/username/${username}`,
+      `${apiUrl}/api/recipe/user/${userId}`,
       { credentials: 'include' }
     );
 
     const result = await data.json();
 
-    return result[0];        
+    return result;
   } catch (error) {
-    console.error("[API] Error fetching users:",error);
+    console.error(`[API] Error fetching recipes by user`,error);
     throw error;
   }
 };
