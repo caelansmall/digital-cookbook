@@ -3,6 +3,7 @@ import './styling/navbar.css';
 import { UserOutlined, FileAddOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Button, Tooltip } from 'antd';
+import Logo from './components/CookbookLogo';
 
 const apiUrl = import.meta.env.VITE_BASE_API;
 
@@ -48,11 +49,18 @@ const Navbar = () => {
             iconPlacement='end'  
           ></Button>
         </Tooltip>
-        
+
       </div>
 
       <div className="navbar-center">
-        <a href="/">Cookbook</a>
+        <img
+          src="/digital_cookbook.svg"
+          alt="Digital Cookbook"
+          width={190}
+          height={35}
+          style={{ cursor: 'pointer' }}
+          onClick={ () => navigate("/")}
+        />
       </div>
 
       <div className="navbar-right">
