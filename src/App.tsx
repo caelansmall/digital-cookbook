@@ -39,7 +39,7 @@ function App() {
 
   return (
     <>
-      <div className="card">
+      <div style={{ backgroundColor: '#FAF7F2', color: 'white', padding: '2em', height: '100%' }}>
         {JSON.stringify(data)}
         <br />
         <button onClick={getTodos}>

@@ -1,6 +1,8 @@
 import { useAuth } from './providers/AuthProvider';
 import './styling/navbar.css';
+import { UserOutlined, FileAddOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { Button, Tooltip } from 'antd';
 
 const apiUrl = import.meta.env.VITE_BASE_API;
 
@@ -26,11 +28,27 @@ const Navbar = () => {
     }
   }
 
+  const createRecipe = () => {
+    navigate("/recipe/create");
+  }
+
   return (
     <nav className="navbar">
 
       <div className="navbar-left">
-        <button>Create</button>
+
+        <Tooltip title="Create recipe">
+          <Button 
+            className="custom-button"
+            shape="round"
+            variant="outlined"
+            size='large'
+            onClick={createRecipe}
+            icon={<FileAddOutlined />}
+            iconPlacement='end'  
+          ></Button>
+        </Tooltip>
+        
       </div>
 
       <div className="navbar-center">
@@ -38,9 +56,14 @@ const Navbar = () => {
       </div>
 
       <div className="navbar-right">
-        <button className="username" onClick={user ? openProfile : queryLogin}>
+        <Button 
+          className="username"
+          onClick={user ? openProfile : queryLogin}
+          icon={ <UserOutlined /> }
+          iconPlacement='end'
+        >
           {user?.username ? user.username : 'Login'}
-        </button>
+        </Button>
       </div>
 
     </nav>
