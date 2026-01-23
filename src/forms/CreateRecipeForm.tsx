@@ -4,6 +4,7 @@ import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Row, Col, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useAuth } from '../providers/AuthProvider';
+import type { Recipe } from '../types/recipe.model';
 
 function RecipeForm() {
   const [form] = Form.useForm();
@@ -14,7 +15,7 @@ function RecipeForm() {
   //   { name: '', quantity: '' }
   // ]);
 
-  const onFinish = (values: any) => {
+  const onFinish = (values: Recipe) => {
     // console.log('recieved values:',values);
 
     const newRecipe = {
