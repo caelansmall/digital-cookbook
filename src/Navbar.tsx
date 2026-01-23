@@ -3,7 +3,6 @@ import './styling/navbar.css';
 import { UserOutlined, FileAddOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Button, Tooltip } from 'antd';
-import Logo from './components/CookbookLogo';
 
 const apiUrl = import.meta.env.VITE_BASE_API;
 

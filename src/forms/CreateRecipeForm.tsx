@@ -1,94 +1,229 @@
 // import Form from 'react-bootstrap/Form';
-import { Button, Row, Col, Form, Container } from 'react-bootstrap';
-import { useState } from 'react';
+// import { Button, Row, Col, Form, Container } from 'react-bootstrap';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Row, Col, Typography } from 'antd';
+import TextArea from 'antd/es/input/TextArea';
+import { useAuth } from '../providers/AuthProvider';
 
 function RecipeForm() {
-  const [ingredients, setIngredients] = useState([
-    { name: '', quantity: '' }
-  ]);
+  const [form] = Form.useForm();
+  const { Title } = Typography;
+  const { user } = useAuth();
 
-  const handleAddIngredient = () => {
-    setIngredients([...ingredients, { name: '', quantity: '' }]);
-  };
+  // const [ingredients, setIngredients] = useState([
+  //   { name: '', quantity: '' }
+  // ]);
 
-  const handleRemoveField = (index: number) => {
-    const values = [...ingredients];
-    console.log(index)
-    values.splice(index,1);
-    console.log(values);
-    setIngredients(values);
-  };
+  const onFinish = (values: any) => {
+    // console.log('recieved values:',values);
 
-  const handleChangeInput = (index: number, event) => {
-    console.log(index,event)
-    const values = [...ingredients];
-    values[index][event.target.name] = event.target.value;
-    setIngredients(values);
-  };
+    const newRecipe = {
+      title: values.title,
+      description: values.description,
+      ingredients: values.ingredients,
+      instructions: values.instructions,
+      userCreatedId: user?.id
+    }
 
-  const handleSubmit = (event) => {
-    console.log('Submitted data:',event);
+    console.log(newRecipe);
   }
 
   return (
-    <Container>
-      <Form onSubmit={ handleSubmit }>
-        <Row>
-          <Col>
-            <Form.Group className="mb-3" controlId="formRecipeTitle">
-              <Form.Label className="text-start">Title</Form.Label>
-              <Form.Control type="recipeTitle" placeholder='Enter Title...' required/>
-            </Form.Group>
+    <div style={{ display: 'flex', alignContent: 'center', justifyContent: 'center', alignItems: 'center'}}>
+
+      <Form
+        name='createRecipe'
+        layout='vertical'
+        variant="underlined"
+        onFinish={onFinish}
+        form={form}
+        style={{ width: '100%', maxWidth: 1000 }}
+        initialValues={{
+        ingredients: [
+            { name: '', quantity: '' },
+          ],
+        instructions: [
+            { name: '' },
+          ],
+        }}
+      >
+        <Row
+          justify="center"
+          style={{
+            width: '100%',
+            columnGap: 16,
+            marginTop: 20,
+            marginBottom: 0
+          }}
+        >
+          <Title
+            style={{
+              fontFamily: 'Inter',
+              fontWeight: 300,
+              fontSize: '24px',
+              lineHeight: 1.2
+            }}
+            level={2}
+          >New Recipe</Title>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item 
+              style={{ display: 'block' }}
+              name='title'
+              label="Recipe Title"
+              required
+              rules={[{ required: true, message: 'Enter recipe title' }]}
+            >
+              <Input
+                placeholder='Enter title...'
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
           </Col>
         </Row>
-        <Row>
-          <Col>
-            <Form.Group className="mb-3" controlId="formRecipeDescription">
-              <Form.Label>Description</Form.Label>
-              <Form.Control type="recipeDescription" placeholder='Enter Description...' />
-            </Form.Group>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item style={{ display: 'block' }} name='description' label="Description">
+              <TextArea
+                placeholder='Enter description...'
+                style={{ width: '100%'}}
+                autoSize={{ minRows: 2, maxRows: 6 }}
+              />
+            </Form.Item>
           </Col>
         </Row>
-        {ingredients.map((ingredient,index) => {
-          return (
-            <div key={index}>
-              <Row>
-                <Col>
-                  <Form.Group className="mg-3 pb-10" controlId="name">
-                    <Form.Label>Ingredient</Form.Label>
-                    <Form.Control 
-                      type="text" 
-                      name="name"
-                      value={ingredient.name}
-                      onChange={event => handleChangeInput(index, event)}
-                      placeholder='Enter ingredient...' 
+
+        <Row
+          align="middle"
+          style={{
+            width: '100%',
+            columnGap: 16,
+            marginBottom: 12
+          }}
+        >
+          <div style={{ flex: 2, }}
+          >Ingredient</div>
+          <div
+            style={{ flex: 1, }}
+          >Quantity</div>
+          <div
+            style={{ width: 24 }}
+          />
+        </Row>
+
+        <Form.List name="ingredients">
+          {(fields, { add, remove }) => (
+            <>
+              {fields.map(({ key, name, ...restField}) => (
+                <Row
+                  key={key}
+                  align="middle"
+                  style={{ 
+                    width: '100%',
+                    columnGap: 16,
+                    marginBottom: 12
+                  }}
+                >
+                  <Form.Item
+                    {...restField}
+                    name={[name,'name']}
+                    style={{ flex: 2, marginBottom: 0 }}
+                    rules={[{ required: true, message: 'Missing ingredient name' }]}
+                    required
+                  >
+                    <Input placeholder="Enter ingredient..." />
+                  </Form.Item>
+                  <Form.Item
+                    {...restField}
+                    name={[name,'quantity']}
+                    style={{ flex: 1, marginBottom: 0 }}
+                    rules={[{ required: true, message: 'Missing quantity'}]}
+                    required
+                  >
+                    <Input style={{ width: '100%'}} placeholder="Enter amount..." />
+                  </Form.Item>
+                  <MinusCircleOutlined onClick={() => remove(name)} />
+                </Row>
+              ))}
+              <Form.Item>
+                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                  Add ingredient
+                </Button>
+              </Form.Item>
+            </>
+          )}
+        </Form.List>
+
+        <Row
+          justify="center"
+          style={{
+            width: '100%',
+            columnGap: 16,
+            marginBottom: 12
+          }}
+        >
+          <Title level={4}>Instructions</Title>
+        </Row>
+
+        <Form.List name="instructions">
+          {(fields, { add, remove }) => (
+            <>
+              {fields.map(({ key, name, ...restField}, index) => (
+                <Row
+                  key={key}
+                  align="middle"
+                  style={{ 
+                    width: '100%',
+                    columnGap: 16,
+                    marginBottom: 12
+                  }}
+                >
+
+                  <div
+                    style={{
+                      width: '24px',
+                      textAlign: 'right',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {index + 1}.
+                  </div>
+
+                  <Form.Item
+                      {...restField}
+                      name={[name,'name']}
+                      style={{ flex: 2, marginBottom: 0 }}
+                      rules={[{ required: true, message: 'Incomplete instructions' }]}
+                      required
+                    >
+                    <TextArea 
+                      variant="outlined"
+                      placeholder="Enter instruction..."
+                      autoSize={{ minRows: 2, maxRows: 6 }}
                     />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group className="mg-3" controlId="quantity">
-                    <Form.Label>Quantity</Form.Label>
-                    <Form.Control 
-                      type="text" 
-                      name="quantity"
-                      value={ingredient.quantity}
-                      onChange={event => handleChangeInput(index, event)}
-                      placeholder='Enter quantity...' 
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Button onClick={() => handleRemoveField(index)}>
-                    Remove
-                  </Button>
-                </Col>
-              </Row>
-            </div>
-          )
-        })}
-        <Button style={{ marginTop: '15px', backgroundColor: '#6B8E7F', borderColor: '#6B8E7F', color: 'white' }} onClick={handleAddIngredient}>Add Ingredient</Button>
+                  </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                </Row>
+              ))}
+              <Form.Item>
+                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                  Add instruction
+                </Button>
+              </Form.Item>
+            </>
+          )}
+        </Form.List>
+
+        <Form.Item>
+          <Button type="primary" htmlType='submit'>
+            Submit
+          </Button>
+        </Form.Item>
       </Form>
-    </Container>
+    </div>
   )
 }
 
