@@ -1,36 +1,48 @@
 // import Form from 'react-bootstrap/Form';
 // import { Button, Row, Col, Form, Container } from 'react-bootstrap';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Row, Col, Typography } from 'antd';
+import { Button, Form, Input, Row, Col, Typography, Spin } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useAuth } from '../providers/AuthProvider';
 import type { Recipe } from '../types/recipe.model';
+import { createRecipe } from '../services/recipes.service';
+import { useState } from 'react';
 
 function RecipeForm() {
+  const [spinning,setSpinning] = useState(false);
   const [form] = Form.useForm();
   const { Title } = Typography;
   const { user } = useAuth();
 
-  // const [ingredients, setIngredients] = useState([
-  //   { name: '', quantity: '' }
-  // ]);
+  const onFinish = async (values: Recipe) => {
+    setSpinning(true);
 
-  const onFinish = (values: Recipe) => {
-    // console.log('recieved values:',values);
-
-    const newRecipe = {
+    const newRecipe: Recipe = {
       title: values.title,
       description: values.description,
       ingredients: values.ingredients,
       instructions: values.instructions,
-      userCreatedId: user?.id
+      createdBy: user?.id
     }
 
+    newRecipe.instructions = newRecipe.instructions?.map((item,index) => {
+      return {
+        ...item,
+        stepNumber: index+1,
+      }
+    });
+
     console.log(newRecipe);
+    const newRecipeId = await createRecipe(newRecipe);
+    console.log(newRecipeId);
+
+    setSpinning(false);
   }
 
   return (
     <div style={{ display: 'flex', alignContent: 'center', justifyContent: 'center', alignItems: 'center'}}>
+
+      <Spin spinning={spinning} fullscreen />
 
       <Form
         name='createRecipe'

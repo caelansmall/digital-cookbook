@@ -1,5 +1,7 @@
-import { createContext, useState, useContext, type Dispatch, type SetStateAction, useMemo, type ReactNode } from 'react';
+import { createContext, useState, useContext, type Dispatch, type SetStateAction, useMemo, type ReactNode, useEffect } from 'react';
 import { type User } from '../types/user.model';
+
+const apiUrl = import.meta.env.VITE_BASE_API;
 
 interface UserContextType {
     user: User | null;
@@ -15,6 +17,19 @@ const AuthContext = createContext<UserContextType | null>(null);
 export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     const [user,setUser] = useState<User | null>(null);
     const value = useMemo(() => ({ user, setUser }), [user])
+
+    useEffect(() => {
+      fetch(`${apiUrl}/me`, { credentials: 'include' })
+        .then(res => {
+          if(res.status === 401) {
+            return fetch(`${apiUrl}/refresh`, { method: "POST", credentials: "include" })
+              .then(() => fetch(`${apiUrl}/me`, { credentials: 'include' }));
+          }
+          return res;
+        })
+        .then(res => res.ok ? res.json() : null)
+        .then(user => setUser(user));
+    }, []);
     return (
         <AuthContext.Provider value={value}>
             {children}

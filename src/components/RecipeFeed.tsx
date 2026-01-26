@@ -1,23 +1,14 @@
-// import { useState, useEffect } from 'react';
-// import { useAuth } from '../providers/AuthProvider';
-// import { readRecipesByUser } from '../services/recipes.service';
 import { Splitter, Typography } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import RecipeList from './RecipeList';
 
 export default function RecipeFeed() {
-  // const { user } = useAuth();
-  // const [ currentRecipes, setCurrentRecipes ] = useState({});
   const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null);
 
-  // useEffect(() => {
-  //     if(user != null || user != undefined) {
-  //       const data = readRecipesByUser(user.id);
-  //       // eslint-disable-next-line react-hooks/set-state-in-effect
-  //       setCurrentRecipes(data);
-  //     }
+  useEffect(() => {
+      // grab recipe from backend --> pass to RecipeView
       
-  //   }, [user])
+    }, [selectedRecipeId])
 
   return (
 

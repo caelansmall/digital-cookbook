@@ -10,6 +10,8 @@ const Navbar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const displayName = user?.username || 'Login';
+
   const openProfile = () => {
     console.log('opening profile');
   }
@@ -58,7 +60,7 @@ const Navbar = () => {
           width={190}
           height={35}
           style={{ cursor: 'pointer' }}
-          onClick={ () => navigate("/")}
+          onClick={ () => navigate("/feed")}
         />
       </div>
 
@@ -69,7 +71,7 @@ const Navbar = () => {
           icon={ <UserOutlined /> }
           iconPlacement='end'
         >
-          {user?.username ? user.username : 'Login'}
+          {displayName}
         </Button>
       </div>
 
