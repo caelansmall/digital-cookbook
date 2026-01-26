@@ -4,7 +4,7 @@ export type Recipe = {
   description?: string;
   ingredients?: Ingredient[],
   instructions?: Instruction[];
-  createdBy?: number;
+  userCreatedId?: number;
   dateCreated?: Date;
 }
 

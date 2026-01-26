@@ -19,16 +19,23 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     const value = useMemo(() => ({ user, setUser }), [user])
 
     useEffect(() => {
+
       fetch(`${apiUrl}/me`, { credentials: 'include' })
-        .then(res => {
-          if(res.status === 401) {
-            return fetch(`${apiUrl}/refresh`, { method: "POST", credentials: "include" })
-              .then(() => fetch(`${apiUrl}/me`, { credentials: 'include' }));
-          }
-          return res;
-        })
         .then(res => res.ok ? res.json() : null)
         .then(user => setUser(user));
+      // let didRefresh = false;
+
+      // fetch(`${apiUrl}/me`, { credentials: 'include' })
+      //   .then(res => {
+      //     if(res.status === 401 && !didRefresh) {
+      //       didRefresh = true;
+      //       return fetch(`${apiUrl}/refresh`, { method: "POST", credentials: "include" })
+      //         .then(() => fetch(`${apiUrl}/me`, { credentials: 'include' }));
+      //     }
+      //     return res;
+      //   })
+        // .then(res => res.ok ? res.json() : null)
+        // .then(user => setUser(user));
     }, []);
     return (
         <AuthContext.Provider value={value}>

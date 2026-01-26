@@ -1,26 +1,26 @@
-import { Flex, Typography, theme } from 'antd';
+import { Empty, Flex, Typography, theme } from 'antd';
 import type { Recipe } from '../types/recipe.model';
 
 const { Title } = Typography;
 
-const recipes: Recipe[] = [
-  {
-    id: 1,
-    title: 'Pasta',
-    description: 'Pasta dish',
-    ingredients: [ { name: 'noodles', quantity: '1lb'}, { name: 'sauce', quantity: '6oz' }],
-    instructions: [ { name: 'cook the noodles' }, { name: 'heat the sauce' }, { name: 'combine the noodles with the sauce' }],
-    createdBy: 2
-  },
-  {
-    id: 2,
-    title: 'Bagel with cheems creams',
-    description: 'yummy breakfast',
-    ingredients: [ { name: 'bagel', quantity: '1 bagel'}, { name: 'cheems creams', quantity: '0.5lb' }],
-    instructions: [ { name: 'cut da bagel in half' }, { name: 'toast da bagel' }, { name: 'apply da shmear' }],
-    createdBy: 2
-  }
-]
+// const recipes: Recipe[] = [
+//   {
+//     id: 1,
+//     title: 'Pasta',
+//     description: 'Pasta dish',
+//     ingredients: [ { name: 'noodles', quantity: '1lb'}, { name: 'sauce', quantity: '6oz' }],
+//     instructions: [ { name: 'cook the noodles' }, { name: 'heat the sauce' }, { name: 'combine the noodles with the sauce' }],
+//     createdBy: 2
+//   },
+//   {
+//     id: 2,
+//     title: 'Bagel with cheems creams',
+//     description: 'yummy breakfast',
+//     ingredients: [ { name: 'bagel', quantity: '1 bagel'}, { name: 'cheems creams', quantity: '0.5lb' }],
+//     instructions: [ { name: 'cut da bagel in half' }, { name: 'toast da bagel' }, { name: 'apply da shmear' }],
+//     createdBy: 2
+//   }
+// ]
 
 interface RecipeRowProps {
   title: string;
@@ -29,6 +29,7 @@ interface RecipeRowProps {
 }
 
 interface RecipeListProps {
+  recipeList: Recipe[];
   selectedRecipeId: number | null;
   onSelect: (id: number) => void;
 }
@@ -84,9 +85,15 @@ export const RecipeRow = ({
 };
 
 export const RecipeList = ({
+  recipeList,
   selectedRecipeId,
   onSelect
 }: RecipeListProps) => {
+
+  if (recipeList.length == 0) {
+    return <Empty style={{ paddingTop: '30px' }} description="No recipes found!" />
+  }
+
   return (
     <Flex
       vertical
@@ -96,12 +103,16 @@ export const RecipeList = ({
         padding: 8,
       }}
     >
-      {recipes.map((r) => (
+      {recipeList.map((r) => (
         <RecipeRow
           key={r.id}
           title={r.title}
           selected={r.id === selectedRecipeId}
-          onClick={() => onSelect(r.id)}
+          onClick={() => {
+            if(r.id !== undefined) {
+              onSelect(r.id);
+            }
+          }}
         />
       ))}
     </Flex>

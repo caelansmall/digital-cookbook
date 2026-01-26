@@ -1,13 +1,17 @@
 import { Typography, Flex, Card, Timeline, Empty } from "antd";
 import type { Recipe } from "../types/recipe.model";
 
+interface RecipeViewProps {
+  recipe: Recipe | null;
+}
+
 const RecipeView = (
-  recipe: Recipe | null,
+  { recipe }: RecipeViewProps
 ) => {
   const { Title, Text } = Typography;
 
   if (!recipe) {
-    return <Empty description="Select a recipe..." />;
+    return <Empty style={{ paddingTop: '30px' }} description="No recipe selected..." />;
   } else {
     return (
       <>

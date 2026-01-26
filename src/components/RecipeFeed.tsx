@@ -1,27 +1,62 @@
-import { Splitter, Typography } from 'antd';
-import { useEffect, useState } from 'react';
+import { Splitter, message } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
 import RecipeList from './RecipeList';
+import { useLocation } from 'react-router-dom';
+import { useAuth } from '../providers/AuthProvider';
+import { readRecipesByUser } from '../services/recipes.service';
+import type { Recipe } from '../types/recipe.model';
+import RecipeView from './RecipeView';
 
 export default function RecipeFeed() {
-  const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null);
+  const location = useLocation();
+  const { user } = useAuth();
+  const [recipeList,setRecipeList] = useState<Recipe[]>([]);
+  const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(location.state?.newRecipeId ? location.state.newRecipeId : null);
 
   useEffect(() => {
-      // grab recipe from backend --> pass to RecipeView
-      
-    }, [selectedRecipeId])
+    if (location.state?.success) {
+      message.success("Recipe created successfully!");
+    }
+    
+  }, [location.state]);
 
+  useEffect(() => {
+    // grab recipe from backend --> pass to RecipeView
+    const fetchRecipes = async () => {
+      let tempList = [];
+      if(user?.id) {
+        tempList = await readRecipesByUser(user.id);
+      } else {
+        console.error('User ID not present');
+      }
+
+      setRecipeList(tempList);
+    }
+
+    if(user) {
+      fetchRecipes();
+    }
+    
+  }, [user])
+
+  const selectedRecipe = useMemo<Recipe | null>(() => {
+    return recipeList.find(r => r.id === selectedRecipeId) ?? null;
+  }, [recipeList, selectedRecipeId]);
+  
   return (
 
     <Splitter style={{ height: '90%', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
       <Splitter.Panel defaultSize='30%' min="25%" max="50%">
         <RecipeList
+          recipeList={recipeList ?? []}
           selectedRecipeId={selectedRecipeId}
           onSelect={setSelectedRecipeId}
         />
         {/* <Typography.Title style={{ whiteSpace: 'nowrap' }}>First</Typography.Title> */}
       </Splitter.Panel>
       <Splitter.Panel>
-        <Typography.Title style={{ whiteSpace: 'nowrap' }}>Second</Typography.Title>
+        {/* <Typography.Title style={{ whiteSpace: 'nowrap' }}>Second</Typography.Title> */}
+        <RecipeView recipe={selectedRecipe} />
       </Splitter.Panel>
     </Splitter>
   )

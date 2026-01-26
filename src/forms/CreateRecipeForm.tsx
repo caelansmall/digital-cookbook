@@ -1,20 +1,28 @@
 // import Form from 'react-bootstrap/Form';
 // import { Button, Row, Col, Form, Container } from 'react-bootstrap';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Row, Col, Typography, Spin } from 'antd';
+import { Button, Form, Input, Row, Col, Typography, Spin, message } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useAuth } from '../providers/AuthProvider';
 import type { Recipe } from '../types/recipe.model';
 import { createRecipe } from '../services/recipes.service';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function RecipeForm() {
   const [spinning,setSpinning] = useState(false);
   const [form] = Form.useForm();
   const { Title } = Typography;
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const onFinish = async (values: Recipe) => {
+
+    if(!user || !user.id) {
+      console.log(user);
+      return;
+    }
+
     setSpinning(true);
 
     const newRecipe: Recipe = {
@@ -22,7 +30,7 @@ function RecipeForm() {
       description: values.description,
       ingredients: values.ingredients,
       instructions: values.instructions,
-      createdBy: user?.id
+      userCreatedId: user?.id
     }
 
     newRecipe.instructions = newRecipe.instructions?.map((item,index) => {
@@ -36,7 +44,11 @@ function RecipeForm() {
     const newRecipeId = await createRecipe(newRecipe);
     console.log(newRecipeId);
 
-    setSpinning(false);
+    if(newRecipeId && newRecipeId >= 0) {
+      message.success("Recipe successfully created!");
+      setSpinning(false);
+      navigate("/feed", { state: { createRecipeSuccess: true, newRecipeId: newRecipeId }});
+    }
   }
 
   return (
