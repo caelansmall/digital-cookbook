@@ -20,22 +20,41 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
 
     useEffect(() => {
 
-      fetch(`${apiUrl}/me`, { credentials: 'include' })
-        .then(res => res.ok ? res.json() : null)
-        .then(user => setUser(user));
-      // let didRefresh = false;
+      let cancelled = false;
 
-      // fetch(`${apiUrl}/me`, { credentials: 'include' })
-      //   .then(res => {
-      //     if(res.status === 401 && !didRefresh) {
-      //       didRefresh = true;
-      //       return fetch(`${apiUrl}/refresh`, { method: "POST", credentials: "include" })
-      //         .then(() => fetch(`${apiUrl}/me`, { credentials: 'include' }));
-      //     }
-      //     return res;
-      //   })
-        // .then(res => res.ok ? res.json() : null)
-        // .then(user => setUser(user));
+      const bootstrapAuth = async () => {
+        try {
+          let res = await fetch(`${apiUrl}/me`, { credentials: 'include' });
+
+          if (res.status === 401) {
+            const refresh = await fetch(`${apiUrl}/refresh`, {
+              method: 'POST',
+              credentials: 'include'
+            });
+
+            if (!refresh.ok) {
+              if(!cancelled) setUser(null);
+              return;
+            }
+
+            res = await fetch(`${apiUrl}/me`, { credentials: 'include' });
+          }
+
+          if (res.ok && !cancelled) {
+            setUser(await res.json());
+          } else if (!cancelled) {
+            setUser(null);
+          }
+        } catch {
+          if (!cancelled) setUser(null);
+        }
+      };
+
+      bootstrapAuth();
+      return () => {
+        cancelled = true;
+      };
+
     }, []);
     return (
         <AuthContext.Provider value={value}>

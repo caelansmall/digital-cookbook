@@ -18,16 +18,16 @@ const Navbar = () => {
 
   const queryLogin = async () => {
     console.log('Queueing login...');
-
-    try {
-      await fetch(`${apiUrl}/login`,
-        {
-          credentials: 'include',
-        }).then(res => res.json()
-      ).then(data => navigate(data.cognitoLoginURL))
-    } catch (error) {
-      console.error(error);
-    }
+    window.location.href = `${apiUrl}/login`;
+    // try {
+    //   await fetch(`${apiUrl}/login`,
+    //     {
+    //       credentials: 'include',
+    //     }).then(res => res.json()
+    //   ).then(data => navigate(data.cognitoLoginURL))
+    // } catch (error) {
+    //   console.error(error);
+    // }
   }
 
   const createRecipe = () => {
