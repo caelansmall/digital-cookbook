@@ -15,6 +15,6 @@ export type Ingredient = {
 }
 
 export type Instruction = {
-  name?: string;
+  instruction?: string;
   stepNumber?: number;
 }
