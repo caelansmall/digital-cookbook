@@ -1,4 +1,4 @@
-import { Typography, Flex, Card, Timeline, Empty } from "antd";
+import { Typography, Flex, Card, Empty } from "antd";
 import type { Recipe } from "../types/recipe.model";
 
 interface RecipeViewProps {
@@ -17,7 +17,7 @@ const RecipeView = (
       <>
         <Card variant="borderless">
           <Flex vertical gap={16}>
-            <Title level={2}>{recipe.title}</Title>
+            <Title style={{ fontFamily: 'Playfair Display, Georgia, serif', }} level={2}>{recipe.title}</Title>
           </Flex>
         </Card>
         <Card title="Ingredients" variant="outlined">
@@ -30,17 +30,54 @@ const RecipeView = (
           </Flex>
         </Card>
         <Card title="Instructions" variant="outlined">
-          <Timeline
-            mode='start'
-            items={recipe.instructions?.map((step, index) => ({
-              title: (
-                <Text strong>Step {index+1}</Text>
-              ),
-              content: (
-                <Text>{step.instruction}</Text>
-              ),
-            }))}
-          />
+          <Flex vertical gap={24}>
+            {recipe.instructions?.map((step, index) => (
+              <Flex key={index} align="flex-start">
+
+                <Flex
+                  justify="flex-end"
+                  style={{ width: "25%", paddingRight: 16 }}
+                >
+                  <Text strong>
+                    Step {index + 1}
+                  </Text>
+                </Flex>
+
+                <Flex
+                  vertical
+                  align="center"
+                  style={{ width: 24 }}
+                >
+                  <div
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      border: "2px solid #1677ff",
+                      background: "#fff",
+                      marginTop: '6px'
+                    }}
+                  />
+                  {recipe.instructions && index < recipe.instructions.length - 1 && (
+                    <div
+                      style={{
+                        width: 2,
+                        flex: 1,
+                        background: "#d9d9d9",
+                        marginTop: 4,
+                      }}
+                    />
+                  )}
+                </Flex>
+
+                <Flex style={{ flex: 1, paddingLeft: 16 }}>
+                  <Text>
+                    {step.instruction}
+                  </Text>
+                </Flex>
+              </Flex>
+            ))}
+          </Flex>
         </Card>
       </>
     )

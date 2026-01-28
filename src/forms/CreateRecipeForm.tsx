@@ -1,7 +1,5 @@
-// import Form from 'react-bootstrap/Form';
-// import { Button, Row, Col, Form, Container } from 'react-bootstrap';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Row, Col, Typography, Spin, message, Card, Flex } from 'antd';
+import { Button, Form, Input, Row, Col, Typography, Spin, message, Card, Flex, AutoComplete, type AutoCompleteProps } from 'antd';
 import '../styling/recipe-form.css';
 import TextArea from 'antd/es/input/TextArea';
 import { useAuth } from '../providers/AuthProvider';
@@ -9,6 +7,8 @@ import type { Recipe } from '../types/recipe.model';
 import { createRecipe } from '../services/recipes.service';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { readIngredientsByPartialName } from '../services/ingredients.service';
+import debounce from 'lodash/debounce';
 
 function RecipeForm() {
   const [spinning,setSpinning] = useState(false);
@@ -16,6 +16,7 @@ function RecipeForm() {
   const { Title } = Typography;
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [options,setOptions] = useState<AutoCompleteProps['options']>([]);
 
   const onFinish = async (values: Recipe) => {
 
@@ -51,6 +52,22 @@ function RecipeForm() {
       navigate("/feed", { state: { createRecipeSuccess: true, newRecipeId: newRecipeId }});
     }
   }
+
+  const readIngredientOptions = debounce(async (searchText: string) => {
+
+    if (typeof searchText !== "string" || !searchText) {
+      setOptions([]);
+      return;
+    }
+
+    const results = await readIngredientsByPartialName(searchText);
+
+    setOptions(
+      results.map((ingredient: { name: string }) => ({
+        value: ingredient.name,
+      }))
+    );
+  }, 300);
 
   return (
     <div style={{ display: 'flex', alignContent: 'center', justifyContent: 'center', alignItems: 'center'}}>
@@ -93,25 +110,6 @@ function RecipeForm() {
               ],
             }}
           >
-            {/* <Row
-              justify="center"
-              style={{
-                width: '100%',
-                columnGap: 16,
-                marginTop: 20,
-                marginBottom: 0
-              }}
-            >
-              <Title
-                style={{
-                  fontFamily: 'Inter',
-                  fontWeight: 300,
-                  fontSize: '24px',
-                  lineHeight: 1.2
-                }}
-                level={2}
-              >New Recipe</Title>
-            </Row> */}
 
             <Row gutter={16}>
               <Col span={24}>
@@ -180,7 +178,13 @@ function RecipeForm() {
                         rules={[{ required: true, message: 'Missing ingredient name' }]}
                         required
                       >
-                        <Input placeholder="Enter ingredient..." />
+                        <AutoComplete
+                          options={options}
+                          style={{ width: '100%' }}
+                          onChange={readIngredientOptions}
+                          placeholder="Enter ingredient..."
+                          notFoundContent={spinning ? <Spin size="small" /> : null}
+                        />
                       </Form.Item>
                       <Form.Item
                         {...restField}
@@ -195,7 +199,7 @@ function RecipeForm() {
                     </Row>
                   ))}
                   <Form.Item>
-                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    <Button type="dashed" onClick={() => {add(); setOptions([])}} block icon={<PlusOutlined />}>
                       Add ingredient
                     </Button>
                   </Form.Item>
