@@ -11,6 +11,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import RecipeFeed from './components/RecipeFeed.tsx';
 import RecipeForm from './forms/CreateRecipeForm.tsx';
 import ProtectedRoute from './components/ProtectedRoute.tsx';
+import "@fontsource/playfair-display/600";
 
 createRoot(document.getElementById('root')!).render(
   <AuthContextProvider>

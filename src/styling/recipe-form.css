@@ -1,0 +1,11 @@
+.submit-button {
+  background-color: #FFFFFF;
+  color: #C97C5D;
+  border-color: #C97C5D;
+}
+
+.submit-button:hover {
+  border-color: #C97C5D !important;
+  color: white !important;
+  background-color: #C97C5D !important;
+}
