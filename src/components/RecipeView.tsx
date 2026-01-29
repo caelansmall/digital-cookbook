@@ -1,4 +1,4 @@
-import { Typography, Flex, Card, Empty, Steps, Switch, Input, Button, Popconfirm, type PopconfirmProps, Spin } from "antd";
+import { App, Typography, Flex, Card, Empty, Steps, Switch, Input, Button, Popconfirm, type PopconfirmProps, Spin } from "antd";
 import type { Recipe } from "../types/recipe.model";
 import { useEffect, useState } from "react";
 import '../styling/recipe-view.css';
@@ -19,6 +19,7 @@ const RecipeView = (
   const [draft,setDraft] = useState<Recipe | null>(null);
   const [spinning,setSpinning] = useState(false);
   const navigate = useNavigate();
+  const { message } = App.useApp();
 
   const onChange = (value: number) => {
     setCurrent(value);
@@ -35,6 +36,7 @@ const RecipeView = (
       const deletedId = await deleteRecipeById(recipe.id);
       console.log(deletedId)
       if(deletedId && deletedId.id > 0) {
+        message.success("Recipe successfully deleted.")
         setSpinning(false);
         navigate('/feed', { state: { deleteRecipeSuccess: true }});
       }

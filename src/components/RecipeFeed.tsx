@@ -26,12 +26,8 @@ export default function RecipeFeed() {
   }
 
   useEffect(() => {
-    if (location.state?.success) {
-      message.success("Recipe created successfully!");
-    }
 
     if (location.state?.deleteRecipeSuccess) {
-      message.success("Recipe successfully deleted.");
       updateRecipes();
     }
     
@@ -52,7 +48,7 @@ export default function RecipeFeed() {
   
   return (
 
-    <Splitter style={{ height: '90%', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
+    <Splitter style={{ height: 'calc(100vh - 64px)', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
       <Splitter.Panel defaultSize='30%' min="25%" max="50%">
         <RecipeList
           recipeList={recipeList ?? []}
