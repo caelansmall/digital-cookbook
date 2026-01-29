@@ -47,9 +47,29 @@ const createRecipe = async (
 
 };
 
-// TODO: read recipe by id
+const deleteRecipeById = async (
+  recipeId: number
+) => {
+  try {
+    const data = await fetch(
+      `${apiUrl}/api/recipe/${recipeId}`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+      }
+    );
+
+    const result = data.json();
+
+    return result;
+  } catch (error) {
+    console.error(`Error deleting recipe`,error);
+    throw error;
+  }
+}
 
 export {
   readRecipesByUser,
   createRecipe,
+  deleteRecipeById,
 }

@@ -47,7 +47,6 @@ function RecipeForm() {
     console.log(newRecipeId);
 
     if(newRecipeId && newRecipeId >= 0) {
-      message.success("Recipe successfully created!");
       setSpinning(false);
       navigate("/feed", { state: { createRecipeSuccess: true, newRecipeId: newRecipeId }});
     }

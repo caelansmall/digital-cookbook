@@ -13,28 +13,35 @@ export default function RecipeFeed() {
   const [recipeList,setRecipeList] = useState<Recipe[]>([]);
   const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(location.state?.newRecipeId ? location.state.newRecipeId : null);
 
+  const updateRecipes = async () => {
+  // grab recipe from backend --> pass to RecipeView
+    let tempList = [];
+    if(user?.id) {
+      tempList = await readRecipesByUser(user.id);
+    } else {
+      console.error('User ID not present');
+    }
+
+    setRecipeList(tempList);
+  }
+
   useEffect(() => {
     if (location.state?.success) {
       message.success("Recipe created successfully!");
+    }
+
+    if (location.state?.deleteRecipeSuccess) {
+      message.success("Recipe successfully deleted.");
+      updateRecipes();
     }
     
   }, [location.state]);
 
   useEffect(() => {
     // grab recipe from backend --> pass to RecipeView
-    const fetchRecipes = async () => {
-      let tempList = [];
-      if(user?.id) {
-        tempList = await readRecipesByUser(user.id);
-      } else {
-        console.error('User ID not present');
-      }
-
-      setRecipeList(tempList);
-    }
 
     if(user) {
-      fetchRecipes();
+      updateRecipes();
     }
     
   }, [user])
