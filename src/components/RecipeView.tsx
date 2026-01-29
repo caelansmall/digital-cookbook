@@ -1,5 +1,7 @@
-import { Typography, Flex, Card, Empty } from "antd";
+import { Typography, Flex, Card, Empty, Steps } from "antd";
 import type { Recipe } from "../types/recipe.model";
+import { useEffect, useState } from "react";
+import '../styling/recipe-view.css';
 
 interface RecipeViewProps {
   recipe: Recipe | null;
@@ -8,8 +10,17 @@ interface RecipeViewProps {
 const RecipeView = (
   { recipe }: RecipeViewProps
 ) => {
-  const { Title, Text } = Typography;
-  console.log(recipe)
+  const { Title, Text, Paragraph } = Typography;
+  const [current,setCurrent] = useState(0);
+
+  const onChange = (value: number) => {
+    setCurrent(value);
+  }
+
+  useEffect(() => {
+    setCurrent(0);
+  },[recipe]);
+
   if (!recipe) {
     return <Empty style={{ paddingTop: '30px' }} description="No recipe selected..." />;
   } else {
@@ -30,54 +41,28 @@ const RecipeView = (
           </Flex>
         </Card>
         <Card title="Instructions" variant="outlined">
-          <Flex vertical gap={24}>
-            {recipe.instructions?.map((step, index) => (
-              <Flex key={index} align="flex-start">
-
-                <Flex
-                  justify="flex-end"
-                  style={{ width: "25%", paddingRight: 16 }}
-                >
-                  <Text strong>
-                    Step {index + 1}
-                  </Text>
-                </Flex>
-
-                <Flex
-                  vertical
-                  align="center"
-                  style={{ width: 24 }}
-                >
-                  <div
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      border: "2px solid #1677ff",
-                      background: "#fff",
-                      marginTop: '6px'
-                    }}
-                  />
-                  {recipe.instructions && index < recipe.instructions.length - 1 && (
-                    <div
+          <Steps
+            current={current}
+            onChange={onChange}
+            orientation="vertical"
+            style={{ paddingLeft: '5%'}}
+            items={recipe.instructions?.map((step) => ({
+                title: (
+                  <div style={{ paddingTop: 4}}>
+                    <Paragraph
                       style={{
-                        width: 2,
-                        flex: 1,
-                        background: "#d9d9d9",
-                        marginTop: 4,
+                        lineHeight: 1.6,
+                        marginBottom: 0,
+                        maxWidth: 600,
                       }}
-                    />
-                  )}
-                </Flex>
-
-                <Flex style={{ flex: 1, paddingLeft: 16 }}>
-                  <Text>
-                    {step.instruction}
-                  </Text>
-                </Flex>
-              </Flex>
-            ))}
-          </Flex>
+                    >
+                      { step.instruction }
+                    </Paragraph>
+                  </div>
+                )
+              })
+            )}
+          />
         </Card>
       </>
     )
