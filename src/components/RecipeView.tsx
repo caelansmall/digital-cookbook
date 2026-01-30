@@ -1,11 +1,11 @@
-import { App, Typography, Flex, Card, Empty, Steps, Switch, Input, Button, Popconfirm, type PopconfirmProps, Spin, AutoComplete, type AutoCompleteProps } from "antd";
+import { App, Typography, Flex, Card, Empty, Steps, Switch, Input, Button, Popconfirm, type PopconfirmProps, Spin, AutoComplete, type AutoCompleteProps, Tooltip } from "antd";
 import type { Ingredient, Recipe } from "../types/recipe.model";
 import { useEffect, useState } from "react";
 import '../styling/recipe-view.css';
 import TextArea from "antd/es/input/TextArea";
 import { deleteRecipeById, updateRecipeById } from "../services/recipes.service";
 import { useNavigate } from "react-router-dom";
-import { PlusOutlined } from "@ant-design/icons";
+import { EditFilled, EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import debounce from "lodash/debounce";
 import { readIngredientsByPartialName } from "../services/ingredients.service";
 
@@ -191,16 +191,21 @@ const RecipeView = (
                 }} level={2}
               >{recipe.title}</Title>
             )}
-            <Switch
-              style={{
-                marginLeft: '15px'
-              }}
-              checked={isEditing}
-              checkedChildren=""
-              unCheckedChildren=""
-              disabled={editDisabled}
-              onChange={swapEditMode}
-            />
+            <Tooltip
+              placement="left"
+              title={editDisabled ? "Press cancel to re-enter view mode." : null}
+            >
+              <Switch
+                style={{
+                  marginLeft: '15px'
+                }}
+                checked={isEditing}
+                checkedChildren={<EditFilled />}
+                unCheckedChildren={<EyeOutlined />}
+                disabled={editDisabled}
+                onChange={swapEditMode}
+              />
+            </Tooltip>
           </Flex>
         </Card>
         <Card title="Ingredients" variant="outlined">
