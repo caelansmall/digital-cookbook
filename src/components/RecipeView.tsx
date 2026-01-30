@@ -207,6 +207,34 @@ const RecipeView = (
               />
             </Tooltip>
           </Flex>
+          {(isEditing || recipe?.description) && (
+            <div style={{ marginTop: 12 }}>
+              {isEditing ? (
+                <TextArea
+                  variant="outlined"
+                  placeholder="Enter description..."
+                  value={draft?.description ?? ""}
+                  autoSize={{ minRows: 2, maxRows: 4 }}
+                  style={{ width: '100%', textAlign: 'left' }}
+                  onChange={(e) =>
+                    setDraft(d => d && ({ ...d, description: e.target.value }))
+                  }
+                />
+              ) : (
+                <Paragraph
+                  style={{
+                    margin: 0,
+                    fontSize: '15px',
+                    color: '#555',
+                    maxWidth: '100%',
+                    textAlign: 'left'
+                  }}
+                >
+                  {recipe.description}
+                </Paragraph>
+              )}
+            </div>
+          )}
         </Card>
         <Card title="Ingredients" variant="outlined">
           <Flex vertical gap={8}>

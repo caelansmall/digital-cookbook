@@ -1,14 +1,15 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Row, Col, Typography, Spin, App, Card, Flex, AutoComplete, type AutoCompleteProps } from 'antd';
+import { Button, Form, Input, Row, Col, Typography, Spin, App, Card, Flex, AutoComplete, type AutoCompleteProps, type FormInstance } from 'antd';
 import '../styling/recipe-form.css';
 import TextArea from 'antd/es/input/TextArea';
 import { useAuth } from '../providers/AuthProvider';
 import type { Recipe } from '../types/recipe.model';
 import { createRecipe } from '../services/recipes.service';
-import { useState } from 'react';
+import { useEffect, useState, type FC, type PropsWithChildren } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { readIngredientsByPartialName } from '../services/ingredients.service';
 import debounce from 'lodash/debounce';
+import SubmitButton from '../components/FormSubmitButton';
 
 function RecipeForm() {
   const [spinning,setSpinning] = useState(false);
@@ -18,6 +19,7 @@ function RecipeForm() {
   const navigate = useNavigate();
   const [options,setOptions] = useState<AutoCompleteProps['options']>([]);
   const { message } = App.useApp();
+  
 
   const onFinish = async (values: Recipe) => {
 
@@ -76,8 +78,6 @@ function RecipeForm() {
 
       <div style={{ display: 'flex', alignContent: 'center', justifyContent: 'center', alignItems: 'center'}}>
 
-        
-
         <Card
           style={{ 
             width: '60%',
@@ -102,6 +102,7 @@ function RecipeForm() {
               name='createRecipe'
               layout='vertical'
               variant="underlined"
+              autoComplete='off'
               onFinish={onFinish}
               form={form}
               style={{ width: '100%', maxWidth: 1000, fontFamily: 'Inter' }}
@@ -119,10 +120,12 @@ function RecipeForm() {
                 <Col span={24}>
                   <Form.Item 
                     style={{ display: 'block' }}
+                    hasFeedback
                     name='title'
                     label="Recipe Title"
+                    validateTrigger='onBlur'
                     required
-                    rules={[{ required: true, message: 'Enter recipe title' }]}
+                    rules={[{ required: true, message: 'Enter recipe title' }, { max: 256, message: 'Title must be 256 characters or less.' }]}
                   >
                     <Input
                       placeholder='Enter title...'
@@ -134,7 +137,14 @@ function RecipeForm() {
 
               <Row gutter={16}>
                 <Col span={24}>
-                  <Form.Item style={{ display: 'block' }} name='description' label="Description">
+                  <Form.Item
+                    style={{ display: 'block' }}
+                    hasFeedback
+                    name='description'
+                    label="Description"
+                    validateTrigger='onBlur'
+                    rules={[{ max: 1024, message: 'Description must be 1024 characters or less.' }]}
+                  >
                     <TextArea
                       placeholder='Enter description...'
                       style={{ width: '100%'}}
@@ -177,9 +187,11 @@ function RecipeForm() {
                       >
                         <Form.Item
                           {...restField}
+                          hasFeedback
                           name={[name,'name']}
                           style={{ flex: 2, marginBottom: 0 }}
-                          rules={[{ required: true, message: 'Missing ingredient name' }]}
+                          validateTrigger='onBlur'
+                          rules={[{ required: true, message: 'Missing ingredient name' }, { max: 128, message: 'Ingredient name must be 128 characters or less.' }]}
                           required
                         >
                           <AutoComplete
@@ -192,9 +204,11 @@ function RecipeForm() {
                         </Form.Item>
                         <Form.Item
                           {...restField}
+                          hasFeedback
                           name={[name,'quantity']}
                           style={{ flex: 1, marginBottom: 0 }}
-                          rules={[{ required: true, message: 'Missing quantity'}]}
+                          validateTrigger='onBlur'
+                          rules={[{ required: true, message: 'Missing quantity'}, { max: 32, message: 'Quantity must be 32 characters or less.' }]}
                           required
                         >
                           <Input style={{ width: '100%'}} placeholder="Enter amount..." />
@@ -247,12 +261,14 @@ function RecipeForm() {
                         </div>
 
                         <Form.Item
-                            {...restField}
-                            name={[name,'name']}
-                            style={{ flex: 2, marginBottom: 0 }}
-                            rules={[{ required: true, message: 'Incomplete instructions' }]}
-                            required
-                          >
+                          {...restField}
+                          hasFeedback
+                          name={[name,'name']}
+                          style={{ flex: 2, marginBottom: 0 }}
+                          validateTrigger='onBlur'
+                          rules={[{ required: true, message: 'Incomplete instructions' }, { max: 1024, message: "Instruction but be 1024 characters or less." }]}
+                          required
+                        >
                           <TextArea 
                             variant="outlined"
                             placeholder="Enter instruction..."
@@ -272,9 +288,7 @@ function RecipeForm() {
               </Form.List>
 
               <Form.Item>
-                <Button type="primary" htmlType='submit' className='submit-button'>
-                  Submit
-                </Button>
+                <SubmitButton form={form}>Submit</SubmitButton>
               </Form.Item>
             </Form>
 
