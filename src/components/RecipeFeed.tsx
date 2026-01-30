@@ -27,7 +27,7 @@ export default function RecipeFeed() {
 
   useEffect(() => {
 
-    if (location.state?.deleteRecipeSuccess) {
+    if (location.state?.deleteRecipeSuccess || location.state?.recipeUpdated) {
       updateRecipes();
     }
     

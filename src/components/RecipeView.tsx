@@ -1,10 +1,13 @@
-import { App, Typography, Flex, Card, Empty, Steps, Switch, Input, Button, Popconfirm, type PopconfirmProps, Spin } from "antd";
-import type { Recipe } from "../types/recipe.model";
+import { App, Typography, Flex, Card, Empty, Steps, Switch, Input, Button, Popconfirm, type PopconfirmProps, Spin, AutoComplete, type AutoCompleteProps } from "antd";
+import type { Ingredient, Recipe } from "../types/recipe.model";
 import { useEffect, useState } from "react";
 import '../styling/recipe-view.css';
 import TextArea from "antd/es/input/TextArea";
-import { deleteRecipeById } from "../services/recipes.service";
+import { deleteRecipeById, updateRecipeById } from "../services/recipes.service";
 import { useNavigate } from "react-router-dom";
+import { PlusOutlined } from "@ant-design/icons";
+import debounce from "lodash/debounce";
+import { readIngredientsByPartialName } from "../services/ingredients.service";
 
 interface RecipeViewProps {
   recipe: Recipe | null;
@@ -13,13 +16,16 @@ interface RecipeViewProps {
 const RecipeView = (
   { recipe }: RecipeViewProps
 ) => {
-  const { Title, Text, Paragraph } = Typography;
   const [current,setCurrent] = useState(0);
   const [isEditing,setIsEditing] = useState(false);
   const [draft,setDraft] = useState<Recipe | null>(null);
   const [spinning,setSpinning] = useState(false);
-  const navigate = useNavigate();
+  const [editDisabled,setEditDisabled] = useState(false);
+  const [options,setOptions] = useState<AutoCompleteProps['options']>([]);
+  const { Title, Text, Paragraph } = Typography;
   const { message } = App.useApp();
+  const navigate = useNavigate();
+
 
   const onChange = (value: number) => {
     setCurrent(value);
@@ -27,7 +33,25 @@ const RecipeView = (
 
   const swapEditMode = (checked: boolean) => {
     setIsEditing(checked);
+    setEditDisabled(checked);
   }
+
+  const readIngredientByPartialName = debounce(async (searchText: string) => {
+    if (typeof searchText !== "string" || !searchText.trim()) {
+      setOptions([]);
+      return;
+    }
+
+    const data = await readIngredientsByPartialName(searchText);
+
+    setOptions(
+      data.map((ingredient: {id: number; name: string}) => ({
+        value: ingredient.name,
+        label: ingredient.name,
+        ingredientId: ingredient.id,
+      }))
+    );
+  }, 300);
 
   const confirmDelete: PopconfirmProps['onConfirm'] = async (e) => {
     console.log(e)
@@ -44,12 +68,94 @@ const RecipeView = (
     
   }
 
+  const addIngredient = () => {
+    if (!draft) return;
+
+    const nextIngredients = [
+      ...(draft.ingredients ?? []),
+      {
+        ingredientAmountId: null, // important for backend diff logic
+        ingredientId: null,
+        name: "",
+        quantity: "",
+      },
+    ];
+
+    setDraft({
+      ...draft,
+      ingredients: nextIngredients,
+    });
+  };
+
+  const removeIngredient = (index: number) => {
+    if (!draft) return;
+
+    const next = [...(draft.ingredients ?? [])];
+    next.splice(index, 1);
+
+    setDraft({
+      ...draft,
+      ingredients: next,
+    });
+  };
+
+  const addStep = () => {
+    if (!draft) return;
+
+    const nextInstructions = [
+      ...(draft.instructions ?? []),
+      {
+        id: null,           // null = new instruction
+        instruction: "",
+        stepNumber: (draft.instructions?.length ?? 0) + 1,
+      },
+    ];
+
+    setDraft({
+      ...draft,
+      instructions: nextInstructions,
+    });
+  };
+
+  const removeStep = (index: number) => {
+    if (!draft) return;
+
+    const next = [...(draft.instructions ?? [])];
+    next.splice(index, 1);
+
+    // re-number steps
+    const renumbered = next.map((step, i) => ({
+      ...step,
+      stepNumber: i + 1,
+    }));
+
+    setDraft({
+      ...draft,
+      instructions: renumbered,
+    });
+  };
+
   const cancel: PopconfirmProps['onCancel'] = (e) => {
     console.log(e)
   }
 
   const handleSave = async () => {
     console.log(draft);
+
+    if(draft){
+      setSpinning(true);
+      const updateId = await updateRecipeById(draft);
+
+      if(updateId && updateId >= 0) {
+        message.success("Recipe successfully updated!");
+        swapEditMode(false);
+        setSpinning(false);
+        navigate("/feed", { state: { recipeUpdated: true, newRecipeId: updateId }});
+      } else {
+        message.error("Error updating recipe");
+      }
+    }
+    
   }
 
   useEffect(() => {
@@ -92,81 +198,134 @@ const RecipeView = (
               checked={isEditing}
               checkedChildren=""
               unCheckedChildren=""
+              disabled={editDisabled}
               onChange={swapEditMode}
             />
           </Flex>
         </Card>
         <Card title="Ingredients" variant="outlined">
           <Flex vertical gap={8}>
-            {recipe.ingredients?.map((i, index) => (
+
+            {(isEditing ? draft?.ingredients : recipe.ingredients)?.map((i, index) => (
               isEditing ? (
-                <Flex key={index} gap={8}>
+                <Flex key={index} gap={8} style={{ width: '100%'}}>
+
                   <Input
                     value={i.quantity}
+                    style={{ flex:1 }}
                     onChange={(e) => {
                       if (!draft || !draft.ingredients) return;
-                      const next = [...draft?.ingredients];
+                      const next = [...draft.ingredients];
                       next[index] = { ...i, quantity: e.target.value };
-                      setDraft({ ...draft, ingredients: next })
+                      setDraft({ ...draft, ingredients: next });
                     }}
                   />
-                  <Input
+
+                  <AutoComplete
+                    options={options}
                     value={i.name}
+                    style={{ flex:1 }}
+                    placeholder="Enter ingredient..."
                     onChange={(e) => {
-                      if (!draft || !draft.ingredients) return;
-                      const next = [...draft?.ingredients];
-                      next[index] = { ...i, name: e.target.value };
-                      setDraft({ ...draft, ingredients: next})
+                      readIngredientByPartialName(e);
+                      if(!draft || !draft.ingredients) return;
+                      const next: Ingredient[] = [...draft.ingredients];
+                      next[index] = {
+                        ...i,
+                        name: e,
+                        ingredientId: null
+                      };
+
+                      setDraft({ ...draft, ingredients: next });
+                    }}
+                    onSelect={(value, option: any) => {
+                      if(!draft || !draft.ingredients) return;
+                      const next = [...draft.ingredients];
+                      next[index] = {
+                        ...i,
+                        name: value,
+                        ingredientId: option.ingredientId ?? null,
+                      };
+
+                      setDraft({ ...draft, ingredients: next });
                     }}
                   />
+                  <Button danger onClick={() => removeIngredient(index)}>
+                    -
+                  </Button>
                 </Flex>
               ) : (
-                <Text
-                  key={i.name}
-                >• {i.quantity} {i.name}</Text>
+                <Text key={i.name}>• {i.quantity} {i.name}</Text>
               )
             ))}
+
+            {isEditing && (
+              <Button
+                type="dashed"
+                icon={<PlusOutlined />}
+                onClick={addIngredient}
+                block
+              >
+                Add ingredient
+              </Button>
+            )}
           </Flex>
+
         </Card>
+
         <Card title="Instructions" variant="outlined">
           <Steps
             current={current}
             onChange={onChange}
             orientation="vertical"
             style={{ paddingLeft: '5%' }}
-            items={recipe.instructions?.map((step,index) => ({
-                title: isEditing ? null : (
-                  <div style={{ paddingTop: 4}}>
-                    <Paragraph
-                      style={{
-                        lineHeight: 1.6,
-                        marginBottom: 0,
-                        maxWidth: 600,
-                      }}
-                    >
-                      { step.instruction }
-                    </Paragraph>
-                  </div>
-                ),
-                content: isEditing ? (
-                  <TextArea
+            items={(isEditing ? draft?.instructions : recipe.instructions)?.map((step,index) => ({
+              title: isEditing ? null : (
+                <div style={{ paddingTop: 4}}>
+                  <Paragraph
                     style={{
-                      width: '100%',
-                      resize: 'vertical'
+                      lineHeight: 1.6,
+                      marginBottom: 0,
+                      maxWidth: 600,
                     }}
+                  >
+                    { step.instruction }
+                  </Paragraph>
+                </div>
+              ),
+              content: isEditing ? (
+                <Flex gap={8}>
+                  <TextArea
+                    style={{ width: '100%', resize: 'vertical' }}
                     value={step.instruction}
                     onChange={(e) => {
                       if(!draft || !draft.instructions) return;
-                      const next = [...draft?.instructions];
+                      const next = [...draft.instructions];
                       next[index] = { ...step, instruction: e.target.value };
                       setDraft({ ...draft, instructions: next });
                     }}
                   />
-                ) : null
-              })
-            )}
+                  <Button danger onClick={() => removeStep(index)}>
+                    -
+                  </Button>
+                </Flex>
+              ) : null
+            }))}
           />
+
+          {isEditing && (
+            <Button
+              type="dashed"
+              icon={<PlusOutlined />}
+              onClick={addStep}
+              block
+              style={{ marginTop: 16 }}
+            >
+              Add step
+            </Button>
+          )}
         </Card>
+
         <div
           style={{
             position: 'fixed',
@@ -176,6 +335,7 @@ const RecipeView = (
             zIndex: 1000
           }}
         >
+
           <Flex gap={12}>
             {isEditing ? (
               <>
@@ -189,6 +349,7 @@ const RecipeView = (
                   onClick={() => {
                     setDraft(recipe);
                     setIsEditing(false);
+                    setEditDisabled(false);
                   }}
                 >Cancel</Button>
               </>
@@ -207,7 +368,9 @@ const RecipeView = (
                 >Delete</Button>
               </Popconfirm>
             )}
+
           </Flex>
+
         </div>
       </>
     )

@@ -9,12 +9,14 @@ export type Recipe = {
 }
 
 export type Ingredient = {
-  id?: number;
+  ingredientId?: number | null;
+  ingredientAmountId?: number | null;
   name?: string;
   quantity?: string;
 }
 
 export type Instruction = {
+  id?: number | null;
   instruction?: string;
   stepNumber?: number;
 }

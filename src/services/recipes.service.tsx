@@ -68,8 +68,34 @@ const deleteRecipeById = async (
   }
 }
 
+const updateRecipeById = async (
+  entity: Recipe,
+) => {
+  try {
+    const data = await fetch(
+      `${apiUrl}/api/recipe/${entity.id}`,
+      { 
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(entity)
+      }
+    );
+
+    const result = data.json();
+
+    return result;
+  } catch (error) {
+    console.error(`Error updating recipe`,error);
+    throw error;
+  }
+}
+
 export {
   readRecipesByUser,
   createRecipe,
   deleteRecipeById,
+  updateRecipeById
 }
