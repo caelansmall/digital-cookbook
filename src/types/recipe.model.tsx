@@ -1,14 +1,22 @@
 export type Recipe = {
-    id?: number;
-    title?: string;
-    description?: string;
-    instructions?: string;
-    createdBy?: number;
-    dateCreated?: Date;
+  id?: number;
+  title: string;
+  description?: string;
+  ingredients?: Ingredient[],
+  instructions?: Instruction[];
+  userCreatedId?: number;
+  dateCreated?: Date;
 }
 
 export type Ingredient = {
-    id?: number;
-    name?: string;
-    quantity?: string;
+  ingredientId?: number | null;
+  ingredientAmountId?: number | null;
+  name?: string;
+  quantity?: string;
+}
+
+export type Instruction = {
+  id?: number | null;
+  instruction?: string;
+  stepNumber?: number;
 }

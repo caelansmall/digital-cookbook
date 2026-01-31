@@ -10,22 +10,15 @@ const Navbar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const displayName = user?.username || 'Login';
+
   const openProfile = () => {
     console.log('opening profile');
   }
 
   const queryLogin = async () => {
     console.log('Queueing login...');
-
-    try {
-      await fetch(`${apiUrl}/login`,
-        {
-          credentials: 'include',
-        }).then(res => res.json()
-      ).then(data => navigate(data.cognitoLoginURL))
-    } catch (error) {
-      console.error(error);
-    }
+    window.location.href = `${apiUrl}/login`;
   }
 
   const createRecipe = () => {
@@ -58,7 +51,7 @@ const Navbar = () => {
           width={190}
           height={35}
           style={{ cursor: 'pointer' }}
-          onClick={ () => navigate("/")}
+          onClick={ () => navigate("/feed")}
         />
       </div>
 
@@ -69,7 +62,7 @@ const Navbar = () => {
           icon={ <UserOutlined /> }
           iconPlacement='end'
         >
-          {user?.username ? user.username : 'Login'}
+          {displayName}
         </Button>
       </div>
 

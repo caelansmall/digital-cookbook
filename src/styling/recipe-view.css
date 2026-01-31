@@ -1,0 +1,25 @@
+.ant-steps-vertical .ant-steps-item-content {
+  width: 100%;
+  flex: 1;
+}
+
+.ant-steps-vertical .ant-steps-item {
+  padding-bottom: 24px;
+  align-items: flex-start;
+}
+
+.ant-steps-item-content {
+  margin-top: 4px;
+}
+
+.cancel-button {
+  background-color: #FFFFFF;
+  color: #C97C5D;
+  border-color: #C97C5D;
+}
+
+.cancel-button:hover {
+  border-color: #C97C5D !important;
+  color: white !important;
+  background-color: #C97C5D !important;
+}
