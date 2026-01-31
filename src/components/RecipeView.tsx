@@ -1,6 +1,6 @@
-import { App, Typography, Flex, Card, Empty, Steps, Switch, Input, Button, Popconfirm, type PopconfirmProps, Spin, AutoComplete, type AutoCompleteProps, Tooltip } from "antd";
+import { App, Typography, Flex, Card, Empty, Steps, Switch, Input, Button, Popconfirm, type PopconfirmProps, Spin, AutoComplete, Tooltip } from "antd";
 import type { Ingredient, Recipe } from "../types/recipe.model";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import '../styling/recipe-view.css';
 import TextArea from "antd/es/input/TextArea";
 import { deleteRecipeById, updateRecipeById } from "../services/recipes.service";
@@ -13,15 +13,21 @@ interface RecipeViewProps {
   recipe: Recipe | null;
 }
 
+type IngredientOption = {
+  value: string;
+  label: string;
+  ingredientId: number;
+};
+
 const RecipeView = (
   { recipe }: RecipeViewProps
 ) => {
   const [current,setCurrent] = useState(0);
   const [isEditing,setIsEditing] = useState(false);
-  const [draft,setDraft] = useState<Recipe | null>(null);
+  const [draft,setDraft] = useState<Recipe | null>(recipe);
   const [spinning,setSpinning] = useState(false);
   const [editDisabled,setEditDisabled] = useState(false);
-  const [options,setOptions] = useState<AutoCompleteProps['options']>([]);
+  const [options,setOptions] = useState<IngredientOption[]>([]);
   const { Title, Text, Paragraph } = Typography;
   const { message } = App.useApp();
   const navigate = useNavigate();
@@ -58,7 +64,6 @@ const RecipeView = (
     if(recipe && recipe.id) {
       setSpinning(true);
       const deletedId = await deleteRecipeById(recipe.id);
-      console.log(deletedId)
       if(deletedId && deletedId.id > 0) {
         message.success("Recipe successfully deleted.")
         setSpinning(false);
@@ -140,7 +145,6 @@ const RecipeView = (
   }
 
   const handleSave = async () => {
-    console.log(draft);
 
     if(draft){
       setSpinning(true);
@@ -157,14 +161,6 @@ const RecipeView = (
     }
     
   }
-
-  useEffect(() => {
-    setDraft(recipe);
-    setCurrent(0);
-    setIsEditing(false);
-  },[recipe]);
-
-  console.log(recipe)
 
   if (!recipe) {
     return <Empty style={{ paddingTop: '30px' }} description="No recipe selected..." />;
@@ -271,7 +267,7 @@ const RecipeView = (
 
                       setDraft({ ...draft, ingredients: next });
                     }}
-                    onSelect={(value, option: any) => {
+                    onSelect={(value, option: IngredientOption) => {
                       if(!draft || !draft.ingredients) return;
                       const next = [...draft.ingredients];
                       next[index] = {

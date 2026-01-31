@@ -1,11 +1,11 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Row, Col, Typography, Spin, App, Card, Flex, AutoComplete, type AutoCompleteProps, type FormInstance } from 'antd';
+import { Button, Form, Input, Row, Col, Typography, Spin, App, Card, Flex, AutoComplete, type AutoCompleteProps } from 'antd';
 import '../styling/recipe-form.css';
 import TextArea from 'antd/es/input/TextArea';
 import { useAuth } from '../providers/AuthProvider';
 import type { Recipe } from '../types/recipe.model';
 import { createRecipe } from '../services/recipes.service';
-import { useEffect, useState, type FC, type PropsWithChildren } from 'react';
+import { useState, } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { readIngredientsByPartialName } from '../services/ingredients.service';
 import debounce from 'lodash/debounce';
@@ -45,9 +45,7 @@ function RecipeForm() {
       }
     });
 
-    console.log(newRecipe);
     const newRecipeId = await createRecipe(newRecipe);
-    console.log(newRecipeId);
 
     if(newRecipeId && newRecipeId >= 0) {
       message.success("Recipe successfully created!");
@@ -85,14 +83,14 @@ function RecipeForm() {
             paddingTop: '10px' 
           }} 
           title={<Title
-                    style={{
-                      fontFamily: 'Playfair Display, Georgia, serif',
-                      fontWeight: 800,
-                      fontSize: '24px',
-                      lineHeight: 1.2,
-                    }}
-                    level={2}
-                  >New Recipe</Title>
+                  style={{
+                    fontFamily: 'Playfair Display, Georgia, serif',
+                    fontWeight: 800,
+                    fontSize: '24px',
+                    lineHeight: 1.2,
+                  }}
+                  level={2}
+                >New Recipe</Title>
             }
         >
 
@@ -199,7 +197,6 @@ function RecipeForm() {
                             style={{ width: '100%' }}
                             onChange={readIngredientOptions}
                             placeholder="Enter ingredient..."
-                            notFoundContent={spinning ? <Spin size="small" /> : null}
                           />
                         </Form.Item>
                         <Form.Item
