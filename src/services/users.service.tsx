@@ -1,3 +1,5 @@
+import type { User } from "../types/user.model";
+
 const apiUrl = import.meta.env.VITE_BASE_API;
 
 export const readUserByUsername = async (username: string) => {
@@ -15,3 +17,28 @@ export const readUserByUsername = async (username: string) => {
     throw error;
   }
 };
+
+export const updateUserById = async (
+  entity: User,
+) => {
+  try {
+    const data = await fetch(
+      `${apiUrl}/api/user/${entity.id}`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(entity)
+      }
+    );
+
+    const result = data.json();
+
+    return result;
+  } catch (error) {
+    console.error(`Error updating user`,error);
+    throw error;
+  }
+}
