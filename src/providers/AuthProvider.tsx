@@ -1,7 +1,6 @@
 import { createContext, useState, useContext, type Dispatch, type SetStateAction, useMemo, type ReactNode, useEffect } from 'react';
 import { type User } from '../types/user.model';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Spin } from 'antd';
 
 const apiUrl = import.meta.env.VITE_BASE_API;
 

@@ -59,7 +59,7 @@ const RecipeView = (
     );
   }, 300);
 
-  const confirmDelete: PopconfirmProps['onConfirm'] = async (e) => {
+  const confirmDelete: PopconfirmProps['onConfirm'] = async () => {
     // console.log(e)
     if(recipe && recipe.id) {
       setSpinning(true);
@@ -140,7 +140,7 @@ const RecipeView = (
     });
   };
 
-  const cancel: PopconfirmProps['onCancel'] = (e) => {
+  const cancel: PopconfirmProps['onCancel'] = () => {
     // console.log(e)
   }
 
