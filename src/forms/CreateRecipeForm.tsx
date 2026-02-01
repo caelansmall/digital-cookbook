@@ -24,7 +24,7 @@ function RecipeForm() {
   const onFinish = async (values: Recipe) => {
 
     if(!user || !user.id) {
-      console.log(user);
+      // console.log(user);
       return;
     }
 

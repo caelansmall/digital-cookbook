@@ -9,7 +9,7 @@ const readIngredientsByPartialName = async (partialName: string) => {
       { credentials: 'include' }
     );
 
-    console.log(data);
+    // console.log(data);
 
     const result = await data.json();
 

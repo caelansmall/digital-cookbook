@@ -23,8 +23,6 @@ const createRecipe = async (
 ) => {
   try {
 
-    console.log(JSON.stringify(entity));
-
     const data = await fetch(
       `${apiUrl}/api/recipe`,
       { 
