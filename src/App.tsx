@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import './App.css';
+import BackgroundCarousel from './components/landing/BackgroundCarousel';
+import LandingPage from './components/landing/LandingPage';
 
 
 const apiUrl = import.meta.env.VITE_BASE_API;
@@ -31,17 +33,7 @@ function App() {
 
   return (
     <>
-      <div style={{ backgroundColor: '#FAF7F2', color: 'white', padding: '2em', height: '100%' }}>
-        {JSON.stringify(data)}
-        <br />
-        <button onClick={getTodos}>
-          Fetch Todos
-        </button>
-        <br />
-        <button onClick={handleLogin}>
-          Login
-        </button>
-      </div>
+      <LandingPage />
     </>
   )
 }

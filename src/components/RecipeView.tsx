@@ -163,7 +163,7 @@ const RecipeView = (
   }
 
   if (!recipe) {
-    return <Empty style={{ paddingTop: '30px' }} description="No recipe selected..." />;
+    return <Empty style={{ paddingTop: '100px' }} description="No recipe selected..." />;
   } else {
     return (
       <>
