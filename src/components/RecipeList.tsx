@@ -1,5 +1,6 @@
-import { Empty, Flex, Typography, theme } from 'antd';
+import { Button, Card, Empty, Flex, Typography, theme } from 'antd';
 import type { Recipe } from '../types/recipe.model';
+import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -67,7 +68,7 @@ export const RecipeList = ({
     <Flex
       vertical
       style={{
-        height: '100%',
+        height: '80%',
         overflowY: 'auto',
         padding: 8,
       }}

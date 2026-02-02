@@ -64,7 +64,7 @@ const deleteRecipeById = async (
     console.error(`Error deleting recipe`,error);
     throw error;
   }
-}
+};
 
 const updateRecipeById = async (
   entity: Recipe,
@@ -89,11 +89,37 @@ const updateRecipeById = async (
     console.error(`Error updating recipe`,error);
     throw error;
   }
+};
+
+const readRecipeByPartialName = async (
+  entity: { userId: number, name: string },
+) => {
+  try {
+    const data = await fetch(
+      `${apiUrl}/api/recipe/autocomplete`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(entity)
+      }
+    );
+
+    const result = data.json();
+
+    return result;
+  } catch (error) {
+    console.error(`Error fetching recipes by partial name`,error);
+    throw error;
+  }
 }
 
 export {
   readRecipesByUser,
   createRecipe,
   deleteRecipeById,
-  updateRecipeById
+  updateRecipeById,
+  readRecipeByPartialName
 }

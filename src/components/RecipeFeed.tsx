@@ -1,17 +1,20 @@
-import { Splitter } from 'antd';
+import { Button, Card, Input, Splitter } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import RecipeList from './RecipeList';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../providers/AuthProvider';
-import { readRecipesByUser } from '../services/recipes.service';
+import { readRecipeByPartialName, readRecipesByUser } from '../services/recipes.service';
 import type { Recipe } from '../types/recipe.model';
 import RecipeView from './RecipeView';
+import debounce from "lodash/debounce";
+import { CloseOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 
 export default function RecipeFeed() {
   const location = useLocation();
   const { user } = useAuth();
   const [recipeList,setRecipeList] = useState<Recipe[]>([]);
   const [manualSelectedId, setManualSelectedId] = useState<number | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const autoSelectedId = location.state?.newRecipeId ?? null;
   const selectedRecipeId = manualSelectedId ?? autoSelectedId;
   const deleteSuccess = location.state?.deleteRecipeSuccess;
@@ -53,11 +56,64 @@ export default function RecipeFeed() {
   const selectedRecipe = useMemo<Recipe | null>(() => {
     return recipeList.find(r => r.id === selectedRecipeId) ?? null;
   }, [recipeList, selectedRecipeId]);
+
+  const findRecipesByPartialName = debounce(async (name: string) => {
+    if(user && user.id && name && name.trim().length > 0) {
+      const data = await readRecipeByPartialName({
+        userId: user.id,
+        name: name.trim()
+    });
+      setRecipeList(data);
+    } else {
+      updateRecipes();
+    }
+  })
   
   return (
 
     <Splitter style={{ height: 'calc(100vh - 80px)', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
       <Splitter.Panel defaultSize='30%' min="25%" max="50%">
+        {isSearching ? (
+          <Card
+            size='small'
+            variant='borderless'
+            children={
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Input
+                  variant='underlined'
+                  placeholder='Search recipes...'
+                  onChange={(e) => findRecipesByPartialName(e.target.value)}
+                />
+                <Button 
+                  type='dashed'
+                  shape='circle'
+                  icon={<CloseOutlined />}
+                  onClick={() => {
+                    setIsSearching(false);
+                    updateRecipes();
+                  }}
+                  style={{
+                    marginLeft: '15px'
+                  }}
+                />
+              </div>
+            }
+          ></Card>
+        ) : (
+          <Card
+            size='small'
+            variant='borderless'
+            children={
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Button className='submit-button' icon={<SearchOutlined />} onClick={() => setIsSearching(true)} size={'large'} />
+                <Button className='submit-button' icon={<FilterOutlined />} size={'large'} />
+              </div>
+            }
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)'
+            }}
+          />
+        )}
         <RecipeList
           recipeList={recipeList ?? []}
           selectedRecipeId={selectedRecipeId}
