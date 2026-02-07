@@ -7,7 +7,7 @@ import { readRecipeByPartialName, readRecipesByUser } from '../services/recipes.
 import type { Recipe } from '../types/recipe.model';
 import RecipeView from './RecipeView';
 import debounce from "lodash/debounce";
-import { CloseOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
+import { CloseOutlined, FilterOutlined, LoadingOutlined, SearchOutlined } from '@ant-design/icons';
 
 export default function RecipeFeed() {
   const location = useLocation();
@@ -15,6 +15,7 @@ export default function RecipeFeed() {
   const [recipeList,setRecipeList] = useState<Recipe[]>([]);
   const [manualSelectedId, setManualSelectedId] = useState<number | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
   const autoSelectedId = location.state?.newRecipeId ?? null;
   const selectedRecipeId = manualSelectedId ?? autoSelectedId;
   const deleteSuccess = location.state?.deleteRecipeSuccess;
@@ -59,11 +60,13 @@ export default function RecipeFeed() {
 
   const findRecipesByPartialName = debounce(async (name: string) => {
     if(user && user.id && name && name.trim().length > 0) {
+      setIsSearchLoading(true);
       const data = await readRecipeByPartialName({
         userId: user.id,
         name: name.trim()
-    });
+      });
       setRecipeList(data);
+      setIsSearchLoading(false);
     } else {
       updateRecipes();
     }
@@ -83,6 +86,11 @@ export default function RecipeFeed() {
                   variant='underlined'
                   placeholder='Search recipes...'
                   onChange={(e) => findRecipesByPartialName(e.target.value)}
+                  suffix={
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      {isSearchLoading && <LoadingOutlined spin />}
+                    </span>
+                  }
                 />
                 <Button 
                   type='dashed'
@@ -90,6 +98,7 @@ export default function RecipeFeed() {
                   icon={<CloseOutlined />}
                   onClick={() => {
                     setIsSearching(false);
+                    setIsSearchLoading(false);
                     updateRecipes();
                   }}
                   style={{
