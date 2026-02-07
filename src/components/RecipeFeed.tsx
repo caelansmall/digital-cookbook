@@ -1,17 +1,22 @@
-import { Splitter } from 'antd';
+import { Button, Card, Input, Popover, Splitter } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import RecipeList from './RecipeList';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../providers/AuthProvider';
-import { readRecipesByUser } from '../services/recipes.service';
+import { readRecipeByPartialName, readRecipesByUser, readRecipesNewestByUserId, readRecipesOldestByUserId } from '../services/recipes.service';
 import type { Recipe } from '../types/recipe.model';
 import RecipeView from './RecipeView';
+import debounce from "lodash/debounce";
+import { CloseOutlined, FilterOutlined, LoadingOutlined, SearchOutlined } from '@ant-design/icons';
+import RecipeSortModal from './RecipeFilter';
 
 export default function RecipeFeed() {
   const location = useLocation();
   const { user } = useAuth();
   const [recipeList,setRecipeList] = useState<Recipe[]>([]);
   const [manualSelectedId, setManualSelectedId] = useState<number | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
   const autoSelectedId = location.state?.newRecipeId ?? null;
   const selectedRecipeId = manualSelectedId ?? autoSelectedId;
   const deleteSuccess = location.state?.deleteRecipeSuccess;
@@ -53,11 +58,104 @@ export default function RecipeFeed() {
   const selectedRecipe = useMemo<Recipe | null>(() => {
     return recipeList.find(r => r.id === selectedRecipeId) ?? null;
   }, [recipeList, selectedRecipeId]);
+
+  const findRecipesByPartialName = debounce(async (name: string) => {
+    if(user && user.id && name && name.trim().length > 0) {
+      setIsSearchLoading(true);
+      const data = await readRecipeByPartialName({
+        userId: user.id,
+        name: name.trim()
+      });
+      setRecipeList(data);
+      setIsSearchLoading(false);
+    } else {
+      updateRecipes();
+    }
+  });
+
+  const readRecipesBySelectedFilter = debounce(async (filter: string) => {
+    if (filter === 'alphabetical' && user?.id) {
+      const data = await readRecipesByUser(user.id);
+      setRecipeList(data);
+    } else if (filter == 'newest' && user?.id) {
+      const data = await readRecipesNewestByUserId(user.id);
+      setRecipeList(data);
+    } else if (filter == 'oldest' && user?.id) {
+      const data = await readRecipesOldestByUserId(user.id);
+      setRecipeList(data);
+    } else {
+      console.error(`[Error] Unknown filter`);
+      updateRecipes();
+    }
+  })
   
   return (
 
     <Splitter style={{ height: 'calc(100vh - 80px)', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
       <Splitter.Panel defaultSize='30%' min="25%" max="50%">
+        {isSearching ? (
+          <Card
+            size='small'
+            variant='borderless'
+            children={
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Input
+                  variant='underlined'
+                  placeholder='Search recipes...'
+                  onChange={(e) => findRecipesByPartialName(e.target.value)}
+                  suffix={
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      {isSearchLoading && <LoadingOutlined spin />}
+                    </span>
+                  }
+                />
+                <Button 
+                  type='dashed'
+                  shape='circle'
+                  icon={<CloseOutlined />}
+                  onClick={() => {
+                    setIsSearching(false);
+                    setIsSearchLoading(false);
+                    updateRecipes();
+                  }}
+                  style={{
+                    marginLeft: '15px'
+                  }}
+                />
+              </div>
+            }
+          ></Card>
+        ) : (
+          <Card
+            size='small'
+            variant='borderless'
+            children={
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Button 
+                  className='submit-button'
+                  icon={<SearchOutlined />}
+                  onClick={() => setIsSearching(true)} size={'large'}
+                />
+                <Popover
+                  content={
+                    <RecipeSortModal
+                      onSortChange={(sort) => {
+                        readRecipesBySelectedFilter(sort);
+                      }}
+                    />
+                  }
+                  trigger="click"
+                  placement='bottomLeft'
+                >
+                  <Button className='submit-button' icon={<FilterOutlined />} size={'large'} />
+                </Popover>
+              </div>
+            }
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)'
+            }}
+          />
+        )}
         <RecipeList
           recipeList={recipeList ?? []}
           selectedRecipeId={selectedRecipeId}

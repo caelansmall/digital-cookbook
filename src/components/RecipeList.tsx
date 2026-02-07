@@ -67,7 +67,7 @@ export const RecipeList = ({
     <Flex
       vertical
       style={{
-        height: '100%',
+        height: '80%',
         overflowY: 'auto',
         padding: 8,
       }}
