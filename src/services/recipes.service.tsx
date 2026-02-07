@@ -116,10 +116,48 @@ const readRecipeByPartialName = async (
   }
 }
 
+const readRecipesNewestByUserId = async (
+  userId: number
+) => {
+  try {
+    const data = await fetch(
+      `${apiUrl}/api/recipe/mostRecent/${userId}`,
+      { credentials: 'include' }
+    );
+
+    const result = await data.json();
+
+    return result;
+  } catch (error) {
+    console.error(`Error fetching newest recipes by user ID`);
+    throw error;
+  }
+}
+
+const readRecipesOldestByUserId = async (
+  userId: number
+) => {
+  try {
+    const data = await fetch(
+      `${apiUrl}/api/recipe/mostAged/${userId}`,
+      { credentials: 'include' }
+    );
+
+    const result = await data.json();
+
+    return result;
+  } catch (error) {
+    console.error(`Error fetching newest recipes by user ID`);
+    throw error;
+  }
+}
+
 export {
   readRecipesByUser,
   createRecipe,
   deleteRecipeById,
   updateRecipeById,
-  readRecipeByPartialName
+  readRecipeByPartialName,
+  readRecipesNewestByUserId,
+  readRecipesOldestByUserId
 }

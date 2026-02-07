@@ -1,13 +1,14 @@
-import { Button, Card, Input, Splitter } from 'antd';
+import { Button, Card, Input, Popover, Splitter } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import RecipeList from './RecipeList';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../providers/AuthProvider';
-import { readRecipeByPartialName, readRecipesByUser } from '../services/recipes.service';
+import { readRecipeByPartialName, readRecipesByUser, readRecipesNewestByUserId, readRecipesOldestByUserId } from '../services/recipes.service';
 import type { Recipe } from '../types/recipe.model';
 import RecipeView from './RecipeView';
 import debounce from "lodash/debounce";
 import { CloseOutlined, FilterOutlined, LoadingOutlined, SearchOutlined } from '@ant-design/icons';
+import RecipeSortModal from './RecipeFilter';
 
 export default function RecipeFeed() {
   const location = useLocation();
@@ -70,6 +71,22 @@ export default function RecipeFeed() {
     } else {
       updateRecipes();
     }
+  });
+
+  const readRecipesBySelectedFilter = debounce(async (filter: string) => {
+    if (filter === 'alphabetical' && user?.id) {
+      const data = await readRecipesByUser(user.id);
+      setRecipeList(data);
+    } else if (filter == 'newest' && user?.id) {
+      const data = await readRecipesNewestByUserId(user.id);
+      setRecipeList(data);
+    } else if (filter == 'oldest' && user?.id) {
+      const data = await readRecipesOldestByUserId(user.id);
+      setRecipeList(data);
+    } else {
+      console.error(`[Error] Unknown filter`);
+      updateRecipes();
+    }
   })
   
   return (
@@ -114,8 +131,24 @@ export default function RecipeFeed() {
             variant='borderless'
             children={
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Button className='submit-button' icon={<SearchOutlined />} onClick={() => setIsSearching(true)} size={'large'} />
-                <Button className='submit-button' icon={<FilterOutlined />} size={'large'} />
+                <Button 
+                  className='submit-button'
+                  icon={<SearchOutlined />}
+                  onClick={() => setIsSearching(true)} size={'large'}
+                />
+                <Popover
+                  content={
+                    <RecipeSortModal
+                      onSortChange={(sort) => {
+                        readRecipesBySelectedFilter(sort);
+                      }}
+                    />
+                  }
+                  trigger="click"
+                  placement='bottomLeft'
+                >
+                  <Button className='submit-button' icon={<FilterOutlined />} size={'large'} />
+                </Popover>
               </div>
             }
             style={{

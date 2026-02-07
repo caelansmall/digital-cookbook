@@ -1,6 +1,5 @@
-import { Button, Card, Empty, Flex, Typography, theme } from 'antd';
+import { Empty, Flex, Typography, theme } from 'antd';
 import type { Recipe } from '../types/recipe.model';
-import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
